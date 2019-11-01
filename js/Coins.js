@@ -1,5 +1,5 @@
 class Coin{
-    constructor(context, imgSrc){
+    constructor(context, imgSrc, lane){
         this.context = context;
         this.image = new Image();
         this.image.src = imgSrc;
@@ -9,6 +9,10 @@ class Coin{
         this.h = 0;
         this.dy = this.dx =2;
         this.dw = 266;
+        this.lane = lane;
+        this.player = null;
+        this.isDraw = false;
+        this.isMagnet = false;
     }
 
     draw(){
@@ -16,13 +20,45 @@ class Coin{
     }
 
     update(screenCoordinates, scale, coinX){
-        this.x = screenCoordinates.x + scale * coinX * WIDTH/this.dx;
-        this.y = screenCoordinates.y - this.dy;
-        this.w = this.image.width * screenCoordinates.w/this.dw;
-        this.h = this.image.height * screenCoordinates.w/this.dw;
+        if(state.CURRENT == state.GAME ){
+            if(this.isMagnet){
+                if(this.player!= null)
+                {
+                    if(this.lane == this.player.lane){
+                        this.x += this.w * -2;
+                        this.y += this.h * (1);
+                    }
+                    else if(this.lane < this.player.lane){
+                        if(this.x <= this.player.getXPos()){
+                            this.x += this.w * 2;
+                            this.y += this.h * (1);
+                        }
+                    }
+    
+                    else if(this.lane > this.player.lane){
+                        if(this.x >= this.player.getXPos()){
+                            this.x += this.w * 2;
+                            this.y += this.h * (1);
+                        }
+                    }
+                }
+                this.isDraw = true;
+            }
+            else{
+                this.x = screenCoordinates.x + scale * coinX * WIDTH/this.dx;
+                this.y = screenCoordinates.y - this.dy;
+                this.w = this.image.width * screenCoordinates.w/this.dw;
+                this.h = this.image.height * screenCoordinates.w/this.dw;
+                this.x += this.w * coinX;
+                this.y += this.h * (-1);
+            }
+        }
+        this.frame++;
+    }
 
-        this.x += this.w * coinX;
-        this.y += this.h * (-1);
+    setMagnet(isMagnet, player){
+        this.isMagnet = isMagnet;
+        this.player = player;
     }
 
     getXPos(){
@@ -35,6 +71,10 @@ class Coin{
 
     getWidth(){
         return this.w;
+    }
+
+    getIsDraw(){
+        return this.isDraw;
     }
 
     reset(){

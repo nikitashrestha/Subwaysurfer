@@ -1,6 +1,7 @@
 #game-window{
-    background-color: gray;
-    margin: 0 150;
+    margin: 30 150;
+    max-width: 100%;
+    /* position: relative; */
 }
 
 body{

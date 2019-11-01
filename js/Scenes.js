@@ -16,13 +16,15 @@ class Scene{
     }
 
     update(screenCoordinates, scale, coinX){
-        this.x = screenCoordinates.x + scale * coinX * WIDTH/this.dx;
-        this.y = screenCoordinates.y - this.dy;
-        this.w = this.image.width * screenCoordinates.w/this.dw;
-        this.h = this.image.height * screenCoordinates.w/this.dw;
+        if(state.CURRENT == state.GAME){
+            this.x = screenCoordinates.x + scale * coinX * WIDTH/this.dx;
+            this.y = screenCoordinates.y - this.dy;
+            this.w = this.image.width * screenCoordinates.w/this.dw;
+            this.h = this.image.height * screenCoordinates.w/this.dw;
 
-        this.x += this.w * coinX;
-        this.y += this.h * (-1);
+            this.x += this.w * coinX;
+            this.y += this.h * (-1);
+        }
     }
 
     reset(){

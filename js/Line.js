@@ -24,12 +24,15 @@ class Line{
         this.coinX = 0;
         this.obstacleX = 0;
         this.sceneX = 0;
+        this.powerX = 0;
         this.sceneSrc = null;
         this.scene = null;
         this.obstacleSrc = null;
         this.obstacle = null;
         this.coinSrc = null;
         this.coin = null;
+        this.powerUp = null;
+        this.powerUpSrc = null;
     }
 
     /* ------------------------Projection function to project each lines----------------------------- */
@@ -51,17 +54,18 @@ class Line{
     }
 
     /* ------------------------Setter for coin----------------------------- */
-    setCoin(coinSrc, coinX){
+    setCoin(coinSrc, coinX, lane){
         this.coinX = coinX;
         this.coinSrc = coinSrc;
-        this.coin = new Coin(this.context, this.coinSrc);
+        this.coin = new Coin(this.context, this.coinSrc, lane);
     }
 
     /* ------------------------Setter for obstacle----------------------------- */
-    setObstacle(obstacleSrc, obstacleX, type){
+    setObstacle(obstacleSrc, obstacleX, lane){
         this.obstacleX = obstacleX;
         this.obstacleSrc = obstacleSrc;
-        this.obstacle = new Obstacles(this.context, this.obstacleSrc, type);
+        this.obstacle = new Obstacles(this.context, this.obstacleSrc, lane);
+        // this.obstacle.lane = lane;
     }
     
     /* ------------------------Setter for scene----------------------------- */
@@ -69,6 +73,13 @@ class Line{
         this.sceneX = sceneX;
         this.sceneSrc = sceneSrc;
         this.scene = new Scene(this.context, this.sceneSrc);
+    }
+
+    /* ------------------------Setter for PowerUps----------------------------- */
+    setPowerUp(powerUpSrc, powerX, lane, type){
+        this.powerX = powerX;
+        this.powerUpSrc = powerUpSrc;
+        this.powerUp = new PowerUps(this.context, this.powerUpSrc, lane, type);
     }
     
     /* ------------------------Getter for ScreenCoordinates----------------------------- */
@@ -111,6 +122,11 @@ class Line{
         this.scene.draw();
     }
 
+    drawPowerUps(){
+        this.updatePowerUps();
+        this.powerUp.draw();
+    }
+
     updateCoin(){
         this.coin.update(this.screenCoordinates,this.scale, this.coinX);
     }
@@ -123,35 +139,71 @@ class Line{
         this.scene.update(this.screenCoordinates, this.scale, this.sceneX);
     }
 
+    updatePowerUps(){
+        this.powerUp.update(this.screenCoordinates, this.scale, this.powerX);
+    }
+
     /* ------------------------Below Functions to check collsion----------------------------- */
     checkCoinCollision(player){
         if(this.coin != null){
             let coinX = this.coin.getXPos();
             let coinW = this.coin.getWidth();
-            if( (coinX + coinW) > player.getXPos() && coinX < player.getXPos()){
-                if(this.coin.getYPos() > player.getYPos()){
-                    return true;
+            if(this.coin.lane == player.lane){
+                if( (coinX + coinW) > player.getXPos() && coinX < player.getXPos()){
+                    if(this.coin.getYPos() > player.getYPos() && ((player.getYPos() + player.h) > this.coin.getYPos())){
+                        return true;
+                    }
                 }
             }
+            
             else{
                 return false;
             }
         }
     }
 
-    // checkObstacleCollision(player){
-    //     if(this.obstacle != null){
-    //         let obstacleX = this.obstacle.getXPos();
-    //         let obstacleW = this.obstacle.getWidth();
-    //         if((obstacleX  - obstacleW) < player.getXPos()){
+    checkPowerUpCollision(player){
+        if(this.powerUp != null){
+            let powerUpX = this.powerUp.getXPos();
+            let powerUpW = this.powerUp.getWidth();
+            if(this.powerUp.lane == player.lane){
+                if( (powerUpX + powerUpW) > player.getXPos() && powerUpX < player.getXPos()){
+                    if(this.powerUp.getYPos() > player.getYPos() && ((player.getYPos() + player.h) > this.powerUp.getYPos())){
+                        return true;
+                    }
+                }
+            }
+            
+            else{
+                return false;
+            }
+        }
+    }
+
+    checkObstacleCollision(player){
+        
+        if(this.obstacle != null){
+
+            if(this.obstacle.lane == player.lane){
+
+                if(this.obstacle.getYPos() < 200 && this.obstacle.getYPos() > 159 && this.obstacle.getYPos() !=0 && player.y > 0){
+                    state.CURRENT = state.OVER;
+                }
+                else if(this.obstacle.getYPos() ==player.getYPos()){
+                    
+                    debugger;
+                }
+            }
+            else{
+                return false;
+            }
                 
-    //             if((this.obstacle.getYPos()) >= player.getYPos()){
-    //                 return true;
-    //             }
-    //         }
-    //         else{
-    //             return false;
-    //         }
-    //     }
-    // }
+        }
+    }
+
+    reset(){
+        this.sceneX = 0;
+        this.coinX = this.obstacleX = this.powerX = 0;
+        this.coin = this.obstacle = this.powerUp = null;
+    }
 }   

@@ -2,23 +2,32 @@ const WIDTH = 1024;
 const HEIGHT = 570;
 const ROADW = 2000;
 const SEGLEN = 200;
-const TOTAL = 2500;
+const TOTAL = 3000;
 const CAMDEPTH = 0.84;
 const CAMX = 0;
 const CAMY = 2500;
 const CAMZ = 0;
+let camYOffset = 0;
 
 
 var coinsSrc = {
-    LEFT : 'images/coinl.png',
+    LEFT : 'images/coinm.png',
     MID : 'images/coinm.png',
-    RIGHT: 'images/coinr.png'
+    RIGHT: 'images/coinm.png'
+}
+
+var magnetSrc = 'images/magnet.png';
+var scoreBooster = 'images/scoreBooster.png';
+
+var powerUpType = {
+    scoreBooster: 1,
+    magnet:2
 }
 
 var obstaclesSrc = {
-    LEFT: 'images/try1.png',
-    MID: 'images/try1.png',
-    RIGHT: 'images/try1.png'
+    LEFT: 'images/trainl.png',
+    MID: 'images/trainm.png',
+    RIGHT: 'images/trainr.png'
 }
 
 var scenesSrc = {

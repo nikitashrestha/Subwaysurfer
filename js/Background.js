@@ -4,7 +4,7 @@ class Background{
         this.context = context;
         this.image = new Image();
         this.image.src = 'images/bg.png';
-        this.offset = 104;
+        this.offset = 114;
     }
 
     draw(){

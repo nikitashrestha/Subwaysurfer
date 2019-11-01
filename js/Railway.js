@@ -6,18 +6,25 @@ class Railway{
         this.playerX = 0;
         this.roadLength = 300;
         this.position = 0;
-        this.x = 0;
+        this.x = WIDTH/2 - 60;
         this.dx = 0;
         this.dy = 200;
-        this.camH = 0;
         this.image = new Image();
         this.image.src = 'images/railway.png';
+        this.range = 200;
+        this.coinSound = new Audio();
+        this.coinSound.src = 'sound/coinsound.ogg';
+        this.imageMagnet = new Image();
+        this.imageMagnet.src = 'images/magnet.png';
+        this.isMagnet = false;
         this.createLines(); 
         this.createCoins();
+        this.createPowerUps();
         this.createObstacles();
         this.createScenes();
+        this.isDraw = false;
+        this.count = 0;
         this.player = new Player(this.context);
-        this.scoreBoard = new ScoreBoard(this.context);
     }
 
     /* ------------------------Creating Lines----------------------------- */
@@ -25,12 +32,6 @@ class Railway{
         for(let i = 0; i < TOTAL; i++){
             let line = new Line(this.context);
             line.setWorldCoordinateZ(i*SEGLEN);
-            if(i > 300 && i < 700){
-                line.setCurve(0.5);
-            }
-            if(i >1100 && i < 1400){
-                line.setCurve(-0.8);
-            }
             this.lines.push(line);
         }
         this.lineLength = this.lines.length;
@@ -38,20 +39,40 @@ class Railway{
 
     /* ------------------------Creating Coins----------------------------- */
     createCoins(){
-        for(let i = 0; i < TOTAL; i++)
-        {
-            if( i > 150 && ( i + 21 ) % 59 == 0)
-                {
-                    this.lines[i].setCoin(coinsSrc.MID, 0);   
-                }
-            if( i > 150 && i % 59 == 0)
-                {
-                    this.lines[i].setCoin(coinsSrc.MID, -2.5); 
-                }
-            if( i > 101 && (i - 21) % 49 == 0)
-                {
-                    this.lines[i].setCoin(coinsSrc.MID, 2.2) ;
-                }
+        for(let i = 0; i < TOTAL; i++){
+            if(((i > 150 && i < 250) || ( i > 450 && i < 600) || ( i > 750 && i < 1000) || ( i > 1100 && i < 1400) || ( i > 1660 && i < 1900) || ( i > 2100 && i < 2800)) && (i + 7) % 59 == 0){
+                this.lines[i].setCoin(coinsSrc.MID, -0.3, 1); 
+            }
+
+            if(((i > 250 && i < 500) || ( i > 600 && i < 850) || ( i > 1000 && i < 1200) || ( i > 1450 && i < 1650) || ( i > 1850 && i < 2400)) && (i % 59 == 0)){
+                this.lines[i].setCoin(coinsSrc.LEFT, -2.5, 0); 
+            }
+
+            if( ((i > 450 && i < 650) || (i > 1405 && i <1600) || (i > 1800 && i <2400)) && (i - 7) % 59 == 0){
+                this.lines[i].setCoin(coinsSrc.RIGHT, 2, 2) ;
+            }
+        }
+    }
+
+    /* ------------------------Creating PowerUps----------------------------- */
+    createPowerUps(){
+        for(let i = 0; i < TOTAL; i++){
+            if(i == 1250 ){
+                this.lines[i].setPowerUp(scoreBooster, -2.5, 0, powerUpType.scoreBooster);
+            }
+            if(i == 400){
+                this.lines[i].setPowerUp(scoreBooster, 2.2, 2, powerUpType.scoreBooster);
+            
+            }
+            if(i == 2150){
+                this.lines[i].setPowerUp(scoreBooster, -0.3, 1, powerUpType.scoreBooster);
+            }
+            if(i == 1000){
+                this.lines[i].setPowerUp(magnetSrc, 2.5, 2, powerUpType.magnet);
+            }
+            if( i == 1500){
+                this.lines[i].setPowerUp(magnetSrc, -2.2, 0, powerUpType.magnet);
+            }
         }
     }
 
@@ -59,64 +80,44 @@ class Railway{
     createObstacles(){
         for(let i = 0; i < TOTAL; i++){
             
-            if(i==551||i==1551||i==1951){
-                this.lines[i].setObstacle(obstaclesSrc.LEFT, -0.1, true); 
+            
+            if( i % 8 == 0 && ((i > 150 && i < 300) || ( i > 900 && i < 1000) || ( i > 1100 && i < 1400) || ( i > 1680 && i < 1780)|| ( i > 2410 && i < 2780))){
+                this.lines[i].setObstacle(obstaclesSrc.RIGHT,0.4, 2);
             }
 
-            if(i==301||i==701||i==1351||i==2291){
-                this.lines[i].setObstacle(obstaclesSrc.MID, -1.5, true);
+            if( i % 8 == 0 && ((i > 150 && i < 250) || (i > 500 && i < 600) || ( i > 850 && i < 1000) || ( i > 1350 && i < 1450) || ( i > 1690 && i < 1800) || ( i > 2410 && i < 2610))){
+                this.lines[i].setObstacle(obstaclesSrc.LEFT,-1.4, 0);
             }
-            
-            if(i==1151||i==1751||i==2491){
-                this.lines[i].setObstacle(obstaclesSrc.MID,0.5, true);
+
+            if( i % 8 == 0 && ((i > 350 && i < 400) || ( i > 650 && i < 750) || ( i > 1505 && i < 1650) || ( i > 1910 && i < 2000))){
+                this.lines[i].setObstacle(obstaclesSrc.MID,-0.4, 1);
             }
+           
         }
     }
 
     /* ------------------------Creating Scenes ( Trees and Houses )----------------------------- */
     createScenes(){
         for(let i = 0; i < TOTAL; i++){
-            if(i>0 && i<451 && i%15==0){
+            if(i%15==0){
                 this.lines[i].setScenes(scenesSrc.TREE1,-4.2);
             }
-            if(i>55 && i<1000 && i%19==0){
+            if(i%19==0){
                 this.lines[i].setScenes(scenesSrc.TREE1,4);
-            }
-            if( i>1800 && (i-99)%91==0){
-                this.lines[i].setScenes(scenesSrc.TREE2,-2);
-            }
-            if( i>1600 && i%151==0){
-                this.lines[i].setScenes(scenesSrc.TREE2,3);
-            }
-
-            if(i==251){
-                this.lines[i].setScenes(scenesSrc.SIGN,-4.5);
-            }
-            if(i==1051){
-                this.lines[i].setScenes(scenesSrc.SIGN,3.5);
-            }
-            if(i>1300 && i<2200 && i%101==0){
-                this.lines[i].setScenes(scenesSrc.HOUSE1,-1.7);
-            }
-            if(i>555 && i<851 && i%29==0){
-                this.lines[i].setScenes(scenesSrc.HOUSE2,0.8);
             }
         }
     }
 
+    /* ------------------------Draw Roads----------------------------- */
     drawRoads(startPos){
         let lineObj, prevLineObj;
-        this.x = 0;
-        this.dx = 0;
-        this.camH = CAMY + this.lines[startPos].getYPos();
-        
+       
         for(let i = startPos; i < startPos + this.roadLength; i++){
 
             lineObj = this.lines[i % this.lineLength];
-            lineObj.project(this.playerX - this.x, this.camH, this.position /*- ( i >= this.lineLength? this.lineLength * SEGLEN: 0)*/);
+            lineObj.project(this.playerX - this.x, CAMY + camYOffset, this.position + 100 /*- ( i >= this.lineLength? this.lineLength * SEGLEN: 0)*/);
 
             this.x += this.dx;
-            this.dx += lineObj.getCurve();
 
             if(lineObj.getScreenCoordinates().y > HEIGHT){
                 continue;
@@ -137,7 +138,7 @@ class Railway{
             let prevScreenCoordinates = prevLineObj.getScreenCoordinates();
             let currentScreenCoordinates = lineObj.getScreenCoordinates();
             this.polygon(colorGrass, 0, prevScreenCoordinates.y, WIDTH, 0, currentScreenCoordinates.y, WIDTH);
-            this.polygon(colorRumble, prevScreenCoordinates.x, prevScreenCoordinates.y, prevScreenCoordinates.w * 1.2, currentScreenCoordinates.x, currentScreenCoordinates.y, currentScreenCoordinates.w * 1.2);
+            // this.polygon(colorRumble, prevScreenCoordinates.x, prevScreenCoordinates.y, prevScreenCoordinates.w * 1.2, currentScreenCoordinates.x, currentScreenCoordinates.y, currentScreenCoordinates.w * 1.2);
             this.polygon(colorRoad, prevScreenCoordinates.x, prevScreenCoordinates.y, prevScreenCoordinates.w, currentScreenCoordinates.x, currentScreenCoordinates.y, currentScreenCoordinates.w);
         }
     }
@@ -148,6 +149,23 @@ class Railway{
             if(this.lines[i%this.lineLength].coin != null){
                 this.lines[i % this.lineLength].drawCoin();
             }
+        }
+    }
+
+    /* ------------------------Drawing PowerUps----------------------------- */
+    drawPowerUps(startPos){
+        this.count++;
+        for(let i = startPos + this.roadLength; i > startPos; i--){
+            if(this.lines[i%this.lineLength].powerUp != null){
+                this.lines[i % this.lineLength].drawPowerUps();
+            }
+        }
+        if(this.count % 100 == 0){
+            this.isMagnet = false;
+            this.count = 0;
+        }
+        if(this.isMagnet){
+            this.context.drawImage(this.imageMagnet, 600, 0, 60, 60);
         }
     }
 
@@ -171,45 +189,64 @@ class Railway{
 
     /* ------------------------Drawing road , scenes, obstacles and coins----------------------------- */
     draw(){
-        if(state.CURRENT == state.GAME){
-            let startPos = this.position/SEGLEN; 
-            this.drawRoads(startPos);
-            this.drawScenes(startPos);
-            this.drawObstacles(startPos);
-            this.drawCoins(startPos);
-            this.player.draw();
-            this.scoreBoard.draw();
-        }
+        
+        let startPos = this.position/SEGLEN; 
+        this.drawRoads(startPos);
+        this.drawScenes(startPos);
+        this.drawPowerUps(startPos);
+        this.drawCoins(startPos);
+        this.drawObstacles(startPos);
+        this.player.draw();
+        // this.scoreBoard.draw();
     }
 
     /* ------------------------Update game environment----------------------------- */
-    update(countAnimationFrame){
+    update(countAnimationFrame, scoreBoard){
         if(state.CURRENT == state.GAME && this.player.getPlayerStatus() == true){
             this.playerX = this.player.getXPos();
             this.position = (this.position + this.dy);
-            // if(this.player.getPlayerStatus())
-            //     this.position+=this.dy;
+            this.player.update();
 
-            // if(this.position >= this.lineLength*SEGLEN)
-            //     this.position-=this.lineLength*SEGLEN;
-            // if(this.position < 0)
-            //     this.position += this.lineLength*SEGLEN;
-            this.player.update(countAnimationFrame);
             if(countAnimationFrame % 25 == 0){
-                this.scoreBoard.updateScore();
+                scoreBoard.updateScore(null);
             }
+
             for(let i = 0; i < this.lines.length; i++){
+                /* Checing Collsion with player in each frame*/
                 if(this.lines[i].checkCoinCollision(this.player)){
+                    this.coinSound.play();
                     this.lines[i].coin = null;
-                    this.scoreBoard.updateCoin();
+                    scoreBoard.updateCoin();
                 }
-                // if(this.lines[i].checkObstacleCollision(this.player)){
-                //     this.lines[i].obstacle = null;
-                //     this.player.setPlayer(false);
-                //     state.CURRENT = state.OVER;
-                //     console.log('obstacle');
-                    
-                // }
+
+                if(this.lines[i].checkPowerUpCollision(this.player)){
+                    this.coinSound.play();
+                    if(this.lines[i].powerUp.getType() == powerUpType.scoreBooster){
+                        scoreBoard.updateScore(this.lines[i].powerUp);
+                    }
+
+                    else if(this.lines[i].powerUp.getType() == powerUpType.magnet){
+                        this.isMagnet = true;
+                        for(let j = i ;j <= this.range + i; j++){
+                            if(this.lines[j].coin != null){
+                                this.lines[j].coin.setMagnet(this.isMagnet, this.player);
+                                // while(this.lines[j].coin.getXPos() == this.player.getXPos())
+                                if(this.lines[j].coin.getIsDraw()){
+                                    this.lines[j].coin = null;
+                                }
+                                
+                                scoreBoard.updateCoin();
+                            }
+                        }
+                    }
+                    this.lines[i].powerUp = null;
+                }
+
+                if(this.lines[i].checkObstacleCollision(this.player)){
+                    this.lines[i].obstacle = null;
+                    this.player.setPlayer(false);
+                    state.CURRENT = state.OVER; 
+                }
             }
         }
     }
@@ -227,14 +264,15 @@ class Railway{
     }
 
     reset(){
-        this.x = this.playerX = this.position = this.camH = 0;
+        this.x = WIDTH/2 - 60;
+        this.playerX = this.position = 0;
+        
         this.lines = [];
-        this.lineLength = null;
-    }
-
-    getRandomNumber(min,max){
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min) ) + min;
+        this.createLines();
+        this.createScenes();
+        this.createObstacles();
+        this.createPowerUps();
+        this.createCoins();
+        this.player.reset();
     }
 }

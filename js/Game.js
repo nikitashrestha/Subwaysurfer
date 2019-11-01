@@ -7,9 +7,17 @@ class Game{
         this.gameBg = new Background(this.canvas, this.context);
         this.gameStart = new GameStart(this.canvas, this.context);
         this.gameOver = new GameOver(this.canvas, this.context);
+        this.scoreBoard = new ScoreBoard(this.context);
         this.railway = new Railway(this.context);
         this.countAnimationFrame = 0;
-
+        this.gameAudio = new Audio();
+        this.gameAudio.src = 'sound/game.wav';
+        this.startButton = {
+            x : WIDTH/2 -200,
+            y : 0,
+            h : HEIGHT,
+            w : 404
+        }
         this.start();
         this.detectKeyboardEvent();
 
@@ -17,14 +25,15 @@ class Game{
 
     drawCanvas(){
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.gameStart.draw();
         this.gameBg.draw();
         this.railway.draw();
+        this.gameStart.draw();
         this.gameOver.draw();
+        this.scoreBoard.draw();
     }
 
     updateCanvas(){
-        this.railway.update(this.countAnimationFrame);
+        this.railway.update(this.countAnimationFrame, this.scoreBoard);
     }
 
     start(){
@@ -32,24 +41,37 @@ class Game{
             // var that = this;
             switch(state.CURRENT){
                 case state.READY:
+                    this.gameAudio.loop = true;
+                    this.gameAudio.play();
                     state.CURRENT = state.GAME;
+                    
                 case state.OVER:
-               
-                   that.railway.reset();
-                   state.CURRENT = state.READY;
+                    let rect = this.canvas.getBoundingClientRect();
+                    let clickX = event.clientX - rect.left;
+                    let clickY = event.clientY - rect.top;
+                    // CHECK IF WE CLICK ON THE START BUTTON
+                    if(clickX >= this.startButton.x && clickX <= this.startButton.x + this.startButton.w && clickY >= this.startButton.y && clickY <= this.startButton.y + this.startButton.h){
+                        this.gameAudio.loop = false;
+                    
+                        this.railway.reset();
+                        this.scoreBoard.reset();
+                        state.CURRENT = state.GAME;
+                    }
             }
-        }
+        }.bind(this);
     }
 
     detectKeyboardEvent(){
-        window.addEventListener('keydown', function(event){
+        document.addEventListener('keydown', function(event){
             var key = event.key || event.keyCode;
-            console.log(key);
+            
             switch(key){
                 case 'ArrowLeft':
                     leftKey.CURRENT = leftKey.PRESSED;
+                    
                 case 'ArrowRight':
                     rightKey.CURRENT = rightKey.PRESSED;
+
                 case 'ArrowUp':
                     upKey.CURRENT = upKey.PRESSED;
             }
